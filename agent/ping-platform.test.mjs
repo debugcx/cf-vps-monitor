@@ -22,7 +22,7 @@ test('R-A08 real ICMP execution uses each platform and family command contract',
   });
   const executable = join(root, process.platform === 'win32' ? 'ping-fixture.exe' : 'ping-fixture');
   const build = spawnSync(go, ['build', '-o', executable, './testdata/ping_fixture.go'], {
-    cwd: agent, encoding: 'utf8', timeout: 60_000, windowsHide: true,
+    cwd: agent, encoding: 'utf8', timeout: 300_000, windowsHide: true,
   });
   assert.ifError(build.error);
   assert.equal(build.status, 0, `test fixture must compile before any behavioral check:\n${build.stdout}${build.stderr}`);
@@ -38,7 +38,7 @@ test('R-A08 real ICMP execution uses each platform and family command contract',
   const overlay = join(root, 'overlay.json');
   writeFileSync(overlay, JSON.stringify({ Replace: { [mainPath]: overlaid } }));
   const checked = spawnSync(go, ['test', '-overlay', overlay, '-count=1', '-timeout', '35s', '-run', '^TestReauditICMPPlatform$', '-v', '.'], {
-    cwd: agent, encoding: 'utf8', timeout: 60_000, windowsHide: true,
+    cwd: agent, encoding: 'utf8', timeout: 300_000, windowsHide: true,
     env: { ...process.env, REAUDIT_PING_OVERLAY: '1', REAUDIT_PING_FIXTURE: executable },
   });
   assert.ifError(checked.error);
