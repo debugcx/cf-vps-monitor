@@ -42,8 +42,13 @@ CF VPS Monitor 是一个轻量 VPS 探针面板，使用 Cloudflare Workers 承�
 | `SUPABASE_URL`        | Variable | Supabase Project URL，例如 `https://xxxx.supabase.co`                    |
 | `SUPABASE_SECRET_KEY` | Secret   | Supabase Secret key，通常以 `sb_secret_` 开头；不要填写 Publishable key、anon key |
 | `JWT_SECRET`          | Secret   | 后台会话签名密钥，必须至少 32 字节；英文/数字不少于 32 个字符                                   |
+| `MFA_SECRET`          | Secret   | 双重身份验证的持久密钥。配置后更换 `JWT_SECRET` 不会让已绑定的验证器失效；不配置时回退到 `JWT_SECRET`        |
 
 `SUPABASE_SERVICE_ROLE_KEY` 仅作为旧部署兼容变量保留；新部署请使用 `SUPABASE_SECRET_KEY`。
+
+`MFA_SECRET` 用于派生 TOTP 密文与恢复码的加密密钥。`JWT_SECRET` 在重新部署时经常被重新生成，
+一旦轮换，已启用的双重身份验证就会永久无法解密且无法恢复 —— 建议配置一个长期不变的 `MFA_SECRET`，
+并与 `JWT_SECRET` 一样妥善保存。
 
 ## 面板部署
 
@@ -57,7 +62,7 @@ CF VPS Monitor 是一个轻量 VPS 探针面板，使用 Cloudflare Workers 承�
 3. Fork [本仓库](https://github.com/kadidalax/cf-vps-monitor)， 创建自己的仓库。到Actions 选择**Agent Release** 点击**Run workflow** 填入创建自己的版本号，再次点击**Run workflow** 创建自己仓库的Agent 安装脚本。
 4. 打开 Cloudflare Dashboard 的 **Workers & Pages**，点击 **创建应用程序**， 点击**Continue with GitHub**。
 5. 选择 GitHub 账号和刚创建的 Fork 仓库，点击**下一步**。
-6. 展开 **高级设置** 配置三个变量 `SUPABASE_URL`、`SUPABASE_SECRET_KEY`、`JWT_SECRET`。`JWT_SECRET` 必须至少 32 字节，英文/数字不少于 32 个字符。
+6. 展开 **高级设置** 配置三个变量 `SUPABASE_URL`、`SUPABASE_SECRET_KEY`、`JWT_SECRET`。`JWT_SECRET` 必须至少 32 字节，英文/数字不少于 32 个字符。若打算启用双重身份验证，再加一个长期不变的 `MFA_SECRET`。
 7. 保持默认 **构建命令** `npm run build`，将 **部署命令** 设置为 `npm run deploy`。
 8. 点击 **部署**。
 9. 如果 Cloudflare 里创建的 Worker 名称不是 `cf-vps-monitor`，需要同步修改 Fork 仓库的 `wrangler.toml` 里的 `name`，两者必须一致。
@@ -74,7 +79,7 @@ CF VPS Monitor 是一个轻量 VPS 探针面板，使用 Cloudflare Workers 承�
 2. 打开 Supabase 项目 **Project Overview** 页面复制 `Project URL`；打开 **Project Settings -> API Keys -> Publishable and secret API keys**，复制 **Secret keys** 中的 `default` Secret key，格式通常为 `sb_secret_...`。
 3. 点击 上面的**Deploy to Cloudflare**。
 4. 登录 Cloudflare, 选择账号、仓库名和 Worker 名称。
-5. 填入对应变量的值 `SUPABASE_URL`、`SUPABASE_SECRET_KEY`、`JWT_SECRET`。`JWT_SECRET` 必须至少 32 字节，英文/数字不少于 32 个字符。
+5. 填入对应变量的值 `SUPABASE_URL`、`SUPABASE_SECRET_KEY`、`JWT_SECRET`。`JWT_SECRET` 必须至少 32 字节，英文/数字不少于 32 个字符。若打算启用双重身份验证，再加一个长期不变的 `MFA_SECRET`。
 6. 保持默认 **构建命令** `npm run build`，将 **部署命令** 设置为 `npm run deploy`。
 7. 点击 **部署**。
 8. 去 [Supabase](https://supabase.com/dashboard/account/tokens) 创建有效期 1 小时的 Access Token。
@@ -93,6 +98,7 @@ npx wrangler login
 $env:SUPABASE_URL="https://xxxx.supabase.co"
 npx wrangler secret put SUPABASE_SECRET_KEY
 npx wrangler secret put JWT_SECRET
+npx wrangler secret put MFA_SECRET
 npm run deploy
 ```
 

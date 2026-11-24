@@ -32,6 +32,9 @@
       },
       "JWT_SECRET": {
         "description": "后台登录会话签名密钥。建议使用至少 32 个字符的随机字符串。"
+      },
+      "MFA_SECRET": {
+        "description": "双重身份验证的持久密钥。配置后，更换 JWT_SECRET 不会导致已绑定的验证器失效；不配置则回退到 JWT_SECRET。"
       }
     }
   },

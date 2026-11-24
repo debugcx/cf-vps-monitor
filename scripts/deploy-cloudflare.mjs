@@ -11,6 +11,9 @@ const deployConfig = join(root, 'worker', '.tmp', 'wrangler-deploy.toml');
 const deploySecretsFile = join(root, 'worker', '.tmp', 'wrangler-secrets.json');
 const requiredSecrets = ['JWT_SECRET'];
 const supabaseSecretNames = ['SUPABASE_SECRET_KEY', 'SUPABASE_SERVICE_ROLE_KEY'];
+// 可选密钥：MFA_SECRET 独立于 JWT_SECRET，用于持久化 TOTP 密文与恢复码。
+// 不强制要求，避免打断没有配置它的既有部署；缺失时 Worker 回退到 JWT_SECRET。
+const optionalSecretNames = ['MFA_SECRET'];
 const deployArgs = process.argv.slice(2);
 const isDryRun = deployArgs.includes('--dry-run');
 const isWorkersBuild = process.env.WORKERS_CI === '1';
@@ -154,7 +157,7 @@ function writeDeployConfig() {
 
 function writeDeploySecretsFile() {
   const secrets = Object.fromEntries(
-    [...requiredSecrets, ...supabaseSecretNames]
+    [...requiredSecrets, ...supabaseSecretNames, ...optionalSecretNames]
       .map(name => [name, process.env[name]?.trim() || ''])
       .filter(([, value]) => value),
   );
