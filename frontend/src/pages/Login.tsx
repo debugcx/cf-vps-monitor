@@ -405,20 +405,11 @@ export default function Login() {
           </form>
         )}
 
-        <Flex justify="center" mt="4">
-          <Button
-            type="button"
-            variant="ghost"
-            size="2"
-            onClick={() => {
-              setRecoveryMode(!recoveryMode);
-              setMfaChallenge('');
-              setMfaCode('');
-            }}
-          >
-            {recoveryMode ? '返回登录' : '忘记密码'}
-          </Button>
-        </Flex>
+        {/*
+          账号创建 / 密码重置入口已从登录页移除。
+          仍可通过 POST /api/admin/recovery（需 Supabase Secret key）重置管理员，
+          或在尚无管理员时自动进入初始化引导。
+        */}
 
       </Card>
 
